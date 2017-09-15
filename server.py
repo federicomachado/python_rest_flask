@@ -16,7 +16,7 @@ api = Api(app)
 class Employees(Resource):
     def get(self):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
-        conn = db_connect.connect() # connect to database
+       # conn = db_connect.connect() # connect to database
         query = conn.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
         return {'employees': [i[0] for i in query.cursor.fetchall()]} # Fetches first column that is Employee ID
     
