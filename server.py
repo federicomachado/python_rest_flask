@@ -17,10 +17,10 @@ class Employees(Resource):
     def get(self):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
-       cursor = db_connect.cursor()
-       query = cursor.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
-       rows = cursor.fetchall()
-       return jsonify ({'employees': rows}) # Fetches first column that is Employee ID
+        cursor = db_connect.cursor()
+        query = cursor.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
+        rows = cursor.fetchall()        
+        return {'costs': [i[0] for i in rows]} # Fetches first column that is Employee ID
     
     def post(self):
         pass
@@ -28,8 +28,10 @@ class Employees(Resource):
     
 class Tracks(Resource):
     def get(self):
-        conn = db_connect.connect()
-        query = conn.execute("select trackid, name, composer, unitprice from tracks;")
+        cursor = db_connect.cursor()
+        query = cursor.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
+        rows = cursor.fetchall() 
+        query = cursor.execute("select trackid, name, composer, unitprice from tracks;")
         result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
         return jsonify(result)
 
