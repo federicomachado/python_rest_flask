@@ -18,7 +18,7 @@ class ProductionTime(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select * from ARTICULO a") # This line performs query and returns json result
+        cursor = cursor.execute("select a.ArtCodId, a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
@@ -35,7 +35,7 @@ class Order(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select * from podprod") # This line performs query and returns json result
+        cursor = cursor.execute("select * from pordprod") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
