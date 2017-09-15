@@ -18,7 +18,7 @@ class ProductionTime(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select a.ArtCodId, a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
+        cursor = cursor.execute("select a.ArtCodId as 'Articulo', a.PrdPesBru as 'Peso Bruto', a.PrdPesNet as 'Peso Neto' from ARTICULO a") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
@@ -37,7 +37,7 @@ class Order(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select p.OProId, p.OProArtId, CAST(p.OProCant as CHAR) from pordprod p") # This line performs query and returns json result
+        cursor = cursor.execute("select p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad'  from pordprod p") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
