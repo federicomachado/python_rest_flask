@@ -26,7 +26,7 @@ class ProductionTime(Resource):
         contador = 0
         for row in rows:            
                 results.append(dict(zip(columns,row)))
-            contador+=1
+                contador+=1
         return results
     
     def post(self):
