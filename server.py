@@ -37,7 +37,7 @@ class Order(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select p.OProId, p.OProArtId, p.OProCant from pordprod p") # This line performs query and returns json result
+        cursor = cursor.execute("select p.OProId, p.OProArtId, CAST(p.OProCant as CHAR) from pordprod p") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
