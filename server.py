@@ -20,7 +20,7 @@ class Employees(Resource):
        cursor = db_connect.cursor()
        query = cursor.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
        rows = cursor.fetchall()
-       return {'employees': rows} # Fetches first column that is Employee ID
+       return jsonify ({'employees': rows}) # Fetches first column that is Employee ID
     
     def post(self):
         pass
