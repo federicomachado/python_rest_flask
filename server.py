@@ -8,7 +8,7 @@ import pyodbc
 import urllib
 
 print pyodbc.drivers()
-db_connect = pyodbc.connect('DRIVER={test};UID=FMACHADO;PWD=Fede1234')
+db_connect = pyodbc.connect('DSN=test;UID=FMACHADO;PWD=Fede1234')
 app = Flask(__name__)
 api = Api(app)
 
