@@ -6,8 +6,7 @@ from sqlalchemy import create_engine
 from json import dumps
 import urllib
 
-db_connect = create_engine('mssql+pyodbc:///?odbc_connect=' +
-                           urllib.quote_plus('DRIVER=FreeTDS;DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN'))
+db_connect = pyodbc.connect('DRIVER={test};UID=FMACHADO;PWD=Fede1234')
 app = Flask(__name__)
 api = Api(app)
 
@@ -16,7 +15,7 @@ class Employees(Resource):
     def get(self):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
         conn = db_connect.connect() # connect to database
-        query = conn.execute("select * from ARTICULO") # This line performs query and returns json result
+        query = conn.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
         return {'employees': [i[0] for i in query.cursor.fetchall()]} # Fetches first column that is Employee ID
     
     def post(self):
