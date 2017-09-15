@@ -13,12 +13,12 @@ app = Flask(__name__)
 api = Api(app)
 
 
-class Employees(Resource):
+class ProductionTime(Resource):
     def get(self):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
+        cursor = cursor.execute("select * from ARTICULO a") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
@@ -30,27 +30,23 @@ class Employees(Resource):
     def post(self):
         pass
 
-    
-class Tracks(Resource):
+class Order(Resource):
     def get(self):
+        #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
+       # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        query = cursor.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
-        rows = cursor.fetchall() 
-##        query = cursor.execute("select trackid, name, composer, unitprice from tracks;")
-        result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
-        return jsonify(result)
-
+        cursor = cursor.execute("select * from podprod") # This line performs query and returns json result
+        columns = [column[0] for column in cursor.description]
+        print columns
+        results = []
+        rows = cursor.fetchall()
+        for row in rows:
+            results.append(dict(zip(columns,row)))
+        return results
     
-class Employees_Name(Resource):
-    def get(self, employee_id):
-        conn = db_connect.connect()
-        query = conn.execute("select * from employees where EmployeeId =%d "  %int(employee_id))
-        result = {'data': [dict(zip(tuple (query.keys()) ,i)) for i in query.cursor]}
-        return jsonify(result)
 
-
-api.add_resource(Employees, '/employees') # Route_1
-api.add_resource(Tracks, '/tracks') # Route_2
+api.add_resource(ProductionTime, '/times') # Route_1
+api.add_resource(Tracks, '/orders') # Route_2
 api.add_resource(Employees_Name, '/employees/<employee_id>') # Route_3
 
 
