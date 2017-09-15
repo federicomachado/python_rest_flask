@@ -19,8 +19,11 @@ class Employees(Resource):
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
         query = cursor.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
-        rows = cursor.fetchall()        
-        return {'costs': [i[0] for i in rows]} # Fetches first column that is Employee ID
+        rows = cursor.fetchall()
+        data = list()
+        for row in rows:
+            data.append(list(row))
+        return row
     
     def post(self):
         pass
