@@ -46,8 +46,7 @@ class Order(Resource):
     
 
 api.add_resource(ProductionTime, '/times') # Route_1
-api.add_resource(Tracks, '/orders') # Route_2
-api.add_resource(Employees_Name, '/employees/<employee_id>') # Route_3
+api.add_resource(Order, '/orders') # Route_2
 
 
 if __name__ == '__main__':
