@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from sqlalchemy import create_engine
 from json import dumps
+import pyodbc
 import urllib
 
 db_connect = pyodbc.connect('DRIVER={test};UID=FMACHADO;PWD=Fede1234')
