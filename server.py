@@ -17,8 +17,11 @@ class Employees(Resource):
     def get(self):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
-        query = db_connect.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
-        return {'employees': [i[0] for i in query.cursor.fetchall()]} # Fetches first column that is Employee ID
+       cursor = db_connect.cursor()
+        query = cursor.execute("select distinct a.PrdPesBru, a.PrdPesNet from ARTICULO a") # This line performs query and returns json result
+        rows = cursor.fetchall()
+        
+        return {'employees': rows} # Fetches first column that is Employee ID
     
     def post(self):
         pass
