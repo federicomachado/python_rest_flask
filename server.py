@@ -12,12 +12,11 @@ import urllib
 print pyodbc.drivers()
 db_connect = pyodbc.connect('DSN=test;UID=FMACHADO;PWD=Fede1234')
 app = Flask(__name__)
-cors = CORS(app, resources={"/*": {"origins": "*"}})
+cors = CORS(app, resources={"*": {"origins": "*"}})
 api = Api(app)
 
 
 class ProductionTime(Resource):
-    @cross_origin()
     def get(self):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
