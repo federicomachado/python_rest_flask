@@ -53,7 +53,7 @@ class Order(Resource):
             if contador<10:
                 print "Row"
                 dicc = dict(zip(columns,row))
-                dicc['OProFchRea'] =str(dicc['OProFchRea'])
+                dicc['Fecha'] =str(dicc['Fecha'])
                # dicc = dumps(dicc, indent=0, sort_keys=True, default=str)
                 results.append(dicc)
                 contador+=1                
