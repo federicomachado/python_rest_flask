@@ -21,7 +21,7 @@ class ProductionTime(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select a.ArtCodId as 'Articulo', a.ArtDsc as 'Descripcion', a.PrdPesBru as 'Tiempo esperado', a.PrdPesNet as 'Tiempo Maximo' from ARTICULO a") # This line performs query and returns json result
+        cursor = cursor.execute("select a.ArtCodId as 'Articulo', a.ArtDsc as 'Descripcion', a.PrdPesBru as 'TiempoEsperado', a.PrdPesNet as 'TiempoMaximo' from ARTICULO a") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
