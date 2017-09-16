@@ -45,7 +45,7 @@ class Order(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad', p.OProObs as 'Observaciones', p.OProFchRea as 'Fecha'  from pordprod p order by p.OProFchRea desc")
+        cursor = cursor.execute("select top 10 p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad', p.OProObs as 'Observaciones', p.OProFchRea as 'Fecha'  from pordprod p order by p.OProFchRea desc")
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
