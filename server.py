@@ -41,7 +41,6 @@ class ProductionTime(Resource):
         pass
 
 class Order(Resource):
-    @cross_origin()
     def get(self):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
