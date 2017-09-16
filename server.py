@@ -43,8 +43,7 @@ class Order(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-##        cursor = cursor.execute("select p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad'  from pordprod p") # This line performs query and returns json result
-        cursor = cursor.execute("select * from pordprod p") # This line performs query and returns json result
+        cursor = cursor.execute("select p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad', p.OProObs as 'Observaciones', p.OProFchRea as 'Fecha'  from pordprod p")
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
@@ -54,12 +53,10 @@ class Order(Resource):
             if contador<10:
                 print "Row"
                 dicc = dict(zip(columns,row))
-                for k in dicc:
-                    print k                
-                dicc = dumps(dicc, indent=4, sort_keys=True, default=str)
+                dicc['OProFchRea'] =str(dicc['OProFchRea'])
+               # dicc = dumps(dicc, indent=0, sort_keys=True, default=str)
                 results.append(dicc)
-                contador+=1
-                contador+=1
+                contador+=1                
         return results
     
 
