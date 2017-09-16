@@ -48,7 +48,7 @@ class Order(Resource):
         rows = cursor.fetchall()
         contador = 0
         for row in rows:            
-            if contador<10:
+            if contador<100:
                 print "Row"
                 dicc = dict(zip(columns,row))
                 dicc['Fecha'] =str(dicc['Fecha'])
