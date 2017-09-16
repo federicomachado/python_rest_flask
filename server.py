@@ -2,6 +2,7 @@
 # -*- coding: cp1252 -*-
 from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
+from flask.ext.cors import CORS
 from sqlalchemy import create_engine
 from json import dumps
 from datetime import date, datetime
@@ -11,6 +12,7 @@ import urllib
 print pyodbc.drivers()
 db_connect = pyodbc.connect('DSN=test;UID=FMACHADO;PWD=Fede1234')
 app = Flask(__name__)
+cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
 api = Api(app)
 
 
