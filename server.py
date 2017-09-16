@@ -4,6 +4,7 @@ from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from sqlalchemy import create_engine
 from json import dumps
+from datetime import date, datetime
 import pyodbc
 import urllib
 
@@ -24,8 +25,12 @@ class ProductionTime(Resource):
         results = []
         rows = cursor.fetchall()
         contador = 0
-        for row in rows:            
-                results.append(dict(zip(columns,row)))
+        for row in rows:
+                dicc = dict(zip(columns,row))
+                for k in dicc:
+                    print k                
+                dicc = json.dumps(dicc, indent=4, sort_keys=True, default=str)
+                results.append(dicc)
                 contador+=1
         return results
     
