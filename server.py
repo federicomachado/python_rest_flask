@@ -37,14 +37,16 @@ class Order(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad'  from pordprod p") # This line performs query and returns json result
+##        cursor = cursor.execute("select p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad'  from pordprod p") # This line performs query and returns json result
+        cursor = cursor.execute("select * from pordprod p") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
         rows = cursor.fetchall()
         contador = 0
-        for row in rows:
+        for row in rows:            
             if contador<10:
+                print row
                 results.append(dict(zip(columns,row)))
             contador+=1
         return results
