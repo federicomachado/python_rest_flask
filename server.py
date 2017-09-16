@@ -26,6 +26,7 @@ class ProductionTime(Resource):
         rows = cursor.fetchall()
         contador = 0
         for row in rows:
+                print "Row"
                 dicc = dict(zip(columns,row))
                 for k in dicc:
                     print k                
@@ -51,9 +52,14 @@ class Order(Resource):
         contador = 0
         for row in rows:            
             if contador<10:
-                print row
-                results.append(dict(zip(columns,row)))
-            contador+=1
+                print "Row"
+                dicc = dict(zip(columns,row))
+                for k in dicc:
+                    print k                
+                dicc = dumps(dicc, indent=4, sort_keys=True, default=str)
+                results.append(dicc)
+                contador+=1
+                contador+=1
         return results
     
 
