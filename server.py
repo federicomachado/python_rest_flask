@@ -21,20 +21,16 @@ class ProductionTime(Resource):
         #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
        # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select a.ArtCodId as 'Articulo', a.PrdPesBru as 'Peso Bruto', a.PrdPesNet as 'Peso Neto' from ARTICULO a") # This line performs query and returns json result
+        cursor = cursor.execute("select a.ArtCodId as 'Articulo', a.ArtDsc as 'Descripcion', a.PrdPesBru as 'Tiempo esperado', a.PrdPesNet as 'Tiempo Maximo' from ARTICULO a") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         print columns
         results = []
-        rows = cursor.fetchall()
-        contador = 0
-        for row in rows:
-                print "Row"
+        rows = cursor.fetchall()        
+        for row in rows:                
                 dicc = dict(zip(columns,row))
                 for k in dicc:
-                    print k                
-                dicc = json.dumps(dicc, indent=4, sort_keys=True, default=str)
-                results.append(dicc)
-                contador+=1
+                    print k                                
+                results.append(dicc)                
         return results
     
     def post(self):
