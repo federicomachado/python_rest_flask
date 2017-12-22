@@ -4,33 +4,36 @@ from flask import Flask, request, jsonify
 from flask_restful import Resource, Api
 from flask_cors import CORS
 from sqlalchemy import create_engine
-from json import dumps
 from datetime import date, datetime
 import pyodbc
 import urllib
 
-print pyodbc.drivers()
-db_connect = pyodbc.connect('DSN=test;UID=FMACHADO;PWD=Fede1234')
-app = Flask(__name__)
-cors = CORS(app, resources={"*": {"origins": "*"}})
-api = Api(app)
+# pip install simplejson
+
+try:
+    db_connect = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};DATABASE=KPUrusalWS;SERVER=ANTILSRV\SQLEXPRESS;PORT=1433;UID=FMACHADO;PWD=Fede1234')
+    app = Flask(__name__)
+    cors = CORS(app, resources={"*": {"origins": "*"}})
+    api = Api(app) 
+except Exception as x:
+    print x
 
 
 class ProductionTime(Resource):
     def get(self):
-        #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
-       # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
         cursor = cursor.execute("select a.ArtCodId as 'Articulo', a.ArtDsc as 'Descripcion', a.PrdPesBru as 'TiempoEsperado', a.PrdPesNet as 'TiempoMaximo' from ARTICULO a") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
-        print columns
         results = []
         rows = cursor.fetchall()        
-        for row in rows:                
-                dicc = dict(zip(columns,row))
-                for k in dicc:
-                    print k                                
-                results.append(dicc)                
+        for row in rows:
+            l = list()
+            for i in range(len(row)):
+                l.append(row[i])
+            l[2]=float(l[2])
+            l[3]=float(l[3])   
+            dicc = dict(zip(columns,l))                             
+            results.append(dicc)                
         return results
     
     def post(self):
@@ -38,8 +41,6 @@ class ProductionTime(Resource):
 
 class Order(Resource):
     def get(self):
-        #DSN=Urusal;Description=KP local;UID=sa;Trusted_Connection=Yes;APP=Python;WSID=FEDERICOH-PC;DATABASE=KPUrusalWS;Network=DBMSLPCN
-       # conn = db_connect.connect() # connect to database
         cursor = db_connect.cursor()
         cursor = cursor.execute("select top 50 p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad', p.OProObs as 'Observaciones', p.OProFchRea as 'Fecha'  from pordprod p order by p.OProFchRea desc")
         columns = [column[0] for column in cursor.description]
@@ -49,10 +50,8 @@ class Order(Resource):
         contador = 0
         for row in rows:            
             if contador<100:
-                print "Row"
                 dicc = dict(zip(columns,row))
                 dicc['Fecha'] =str(dicc['Fecha'])
-               # dicc = dumps(dicc, indent=0, sort_keys=True, default=str)
                 results.append(dicc)
                 contador+=1                
         return results
