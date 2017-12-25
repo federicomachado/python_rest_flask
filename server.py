@@ -42,24 +42,38 @@ class ProductionTime(Resource):
 class Order(Resource):
     def get(self):
         cursor = db_connect.cursor()
-        cursor = cursor.execute("select top 50 p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad', p.OProObs as 'Observaciones', p.OProFchRea as 'Fecha'  from pordprod p order by p.OProFchRea desc")
-        columns = [column[0] for column in cursor.description]
-        print columns
+        cursor = cursor.execute("select p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad', p.OProObs as 'Observaciones', p.OProFchRea as 'Fecha'  from pordprod p \
+                                      where p.OProFchRea >= '2015/01/06'\
+                                      order by p.OProFchRea desc")
+        columns = [column[0] for column in cursor.description]        
         results = []
         rows = cursor.fetchall()
         contador = 0
         for row in rows:            
-            if contador<100:
-                dicc = dict(zip(columns,row))
-                dicc['Fecha'] =str(dicc['Fecha'])
-                results.append(dicc)
-                contador+=1                
+            dicc = dict(zip(columns,row))
+            dicc['Fecha'] =str(dicc['Fecha'])
+            results.append(dicc)
         return results
     
+class Worker(Resource):
+    def get (self):
+        cursor = db_connect.cursor()
+        cursor = cursor.execute("select * from CORENT c where c.AuxTpoId like 'FU'")
+        columns = [column[0] for column in cursor.description]        
+        results = []
+        rows = cursor.fetchall()
+        contador = 0
+        for row in rows:            
+            dicc = dict(zip(columns,row))        
+            results.append(dicc)
+        return results
+        
+        
 
 api.add_resource(ProductionTime, '/times') # Route_1
 api.add_resource(Order, '/orders') # Route_2
+api.add_resource(Worker, '/workers') # Route_3
 
 
 if __name__ == '__main__':
-     app.run()
+     app.run(host="192.168.1.7",port=5000)
