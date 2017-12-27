@@ -1,19 +1,23 @@
 #!/usr/bin/python3
 # -*- coding: cp1252 -*-
 from flask import Flask, request, jsonify
-from flask_restful import Resource, Api
+from flask_restful import Resource, Api, reqparse, abort
 from flask_cors import CORS
 from sqlalchemy import create_engine
 from datetime import date, datetime
 import pyodbc
+import sqlite3
 import urllib
 
 # pip install simplejson
 
 try:
     db_connect = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};DATABASE=KPUrusalWS;SERVER=ANTILSRV\SQLEXPRESS;PORT=1433;UID=FMACHADO;PWD=Fede1234')
+    parser = reqparse.RequestParser()
+    parser.add_argument('username')
     app = Flask(__name__)
     cors = CORS(app, resources={"*": {"origins": "*"}})
+    db_sqlite3 = sqlite3.connect("entries.db")
     api = Api(app) 
 except Exception as x:
     print x
@@ -38,6 +42,15 @@ class ProductionTime(Resource):
     
     def post(self):
         pass
+
+class WorkerEntry(Resource):
+    def get(self):
+        pass
+    def post(self):
+        args = parser.parse_args()
+        print args
+        return args['username']
+        
 
 class Order(Resource):
     def get(self):
@@ -73,7 +86,9 @@ class Worker(Resource):
 api.add_resource(ProductionTime, '/times') # Route_1
 api.add_resource(Order, '/orders') # Route_2
 api.add_resource(Worker, '/workers') # Route_3
+api.add_resource(WorkerEntry, '/entries') # Route_3
 
 
 if __name__ == '__main__':
-     app.run(host="192.168.1.7",port=5000)
+##    app.run(host="localhost",port=5000)
+    app.run(host="192.168.1.7",port=5000)
