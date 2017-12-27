@@ -11,10 +11,15 @@ import urllib
 
 # pip install simplejson
 
+def initWorkerParser():
+    parser = reqparse.RequestParser()
+    parser.add_argument("username")
+    parser.add_argument("password")
+    return parser
+
 try:
     db_connect = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};DATABASE=KPUrusalWS;SERVER=ANTILSRV\SQLEXPRESS;PORT=1433;UID=FMACHADO;PWD=Fede1234')
-    parser = reqparse.RequestParser()
-    parser.add_argument('username')
+    workerParser = initWorkerParser()
     app = Flask(__name__)
     cors = CORS(app, resources={"*": {"origins": "*"}})
     db_sqlite3 = sqlite3.connect("entries.db")
@@ -22,6 +27,8 @@ try:
 except Exception as x:
     print x
 
+
+    
 
 class ProductionTime(Resource):
     def get(self):
@@ -47,9 +54,9 @@ class WorkerEntry(Resource):
     def get(self):
         pass
     def post(self):
-        args = parser.parse_args()
+        args = workerParser.parse_args()
         print args
-        return args['username']
+        return args,201
         
 
 class Order(Resource):
