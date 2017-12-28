@@ -1,0 +1,2 @@
+.open entries.db
+create table entry(order_id text primary key, firstWorker text, secondWorker text, meanTime real, meanTimePerWorker real, date text, startTime text, endTime text, stopTime real, realTime real, timePerWorker real, firstWorkerDesc text, secondWorkerDesc text);
