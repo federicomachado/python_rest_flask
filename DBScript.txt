@@ -1,2 +1,6 @@
 .open entries.db
 create table entry(order_id text primary key, firstWorker text, secondWorker text, meanTime real, meanTimePerWorker real, date text, startTime text, endTime text, stopTime real, realTime real, timePerWorker real, firstWorkerDesc text, secondWorkerDesc text);
+create table workerEntry(workerName text primary key, workerNameDesc text, orderQuantity real, meanRate real, faultCount real);
+create table workerEntryRates(id integer primary key autoincrement, workerName text, rate real, date text);
+
+cursor.execute('''UPDATE books SET price = ? WHERE id = ?''', (newPrice, book_id))

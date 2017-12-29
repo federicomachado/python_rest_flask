@@ -8,8 +8,29 @@ from datetime import date, datetime
 import pyodbc
 import sqlite3
 import urllib
-
+import json, inspect
 # pip install simplejson
+
+class ObjectEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, "to_json"):
+            return self.default(obj.to_json())
+        elif hasattr(obj, "__dict__"):
+            d = dict(
+                (key, value)
+                for key, value in inspect.getmembers(obj)
+                if not key.startswith("__")
+                and not inspect.isabstract(value)
+                and not inspect.isbuiltin(value)
+                and not inspect.isfunction(value)
+                and not inspect.isgenerator(value)
+                and not inspect.isgeneratorfunction(value)
+                and not inspect.ismethod(value)
+                and not inspect.ismethoddescriptor(value)
+                and not inspect.isroutine(value)
+            )
+            return self.default(d)
+        return obj
 
 def initRegistryParser():
     parser = reqparse.RequestParser()
@@ -28,9 +49,28 @@ def initRegistryParser():
     parser.add_argument("secondWorkerDesc")
     return parser
 
+def initWorkerRegistryParser():
+    parser = reqparse.RequestParser()
+    parser.add_argument("workerName")
+    parser.add_argument("workerNameDesc")
+    parser.add_argument("orderQuantity")
+    parser.add_argument("meanRate")
+    parser.add_argument("faultCount")
+    return parser
+
+def initWorkerRegistryRateParser():
+    parser = reqparse.RequestParser()
+    parser.add_argument("workerName")
+    parser.add_argument("rate")
+    parser.add_argument("date")
+
+    return parser
+
 try:
     db_connect = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};DATABASE=KPUrusalWS;SERVER=ANTILSRV\SQLEXPRESS;PORT=1433;UID=FMACHADO;PWD=Fede1234')
     registryParser = initRegistryParser()
+    workerRegistryParser = initWorkerRegistryParser()
+    workerRegistryRatesParser = initWorkerRegistryRateParser()
     app = Flask(__name__)
     cors = CORS(app, resources={"*": {"origins": "*"}})
     db_sqlite3 = sqlite3.connect("entries.db")
@@ -38,8 +78,26 @@ try:
 except Exception as x:
     print x
 
+class WorkerObj:
 
-    
+    def __init__(self, workerName, workerNameDesc, orderQuantity, meanRate,faultCount):
+        self.workerName =workerName
+        self.workerNameDesc = workerNameDesc
+        self.orderQuantity = orderQuantity
+        self.meanRate = meanRate
+        self.faultCount = faultCount
+        self.rateArray = []
+        self.dateArray = []
+
+
+    def __str__(self):
+        s = ""
+        z = ""
+        for x in self.rateArray:
+            s+= str(x)+" "
+        for y in self.dateArray:
+            z+= str(y)+" "
+        return self.workerName+ "\n" + s + "\n" + z
 
 class ProductionTime(Resource):
     def get(self):
@@ -63,7 +121,17 @@ class ProductionTime(Resource):
 
 class RegistryEntry(Resource):
     def get(self):
-        pass
+        cursor = db_sqlite3.cursor()
+        cursor = cursor.execute("select * from entry;")
+        columns = [column[0] for column in cursor.description]        
+        results = []
+        rows = cursor.fetchall()
+##        print rows
+        for row in rows:            
+            dicc = dict(zip(columns,row))            
+            results.append(dicc)
+        return results
+        
     def post(self):
         args = registryParser.parse_args()        
         c = db_sqlite3.cursor()
@@ -101,12 +169,80 @@ class Worker(Resource):
             results.append(dicc)
         return results
 
+class WorkerEntry(Resource):
+    def get(self):
+        cursor = db_sqlite3.cursor()
+        cursor = cursor.execute("select * from workerEntry inner join workerEntryRates ON workerEntry.workerName = workerEntryRates.workerName")
+        columns = [column[0] for column in cursor.description]        
+        results = []
+        rows = cursor.fetchall()
+        names = []
+        workers = []
+        dictionary = {}
+        for row in rows:
+##            print row
+            dicc = dict(zip(columns,row))        
+            results.append(dicc)
+            if row[0] not in names:
+                names.append(row[0])
+                x = WorkerObj(row[0],row[1],row[2],row[3],row[4])
+                x.rateArray.append(row[7])
+                x.dateArray.append(row[8])
+                workers.append(x)
+            else:
+                for w in workers:
+                    w.rateArray.append(row[7])
+                    w.dateArray.append(row[8])
+                
+        for w in workers:
+            print w
+##        for name in names:                        
+##            print name
+##            
+##        for row in results:
+##            workerName = row["workerName"]
+##            cursor = cursor.execute("select * from workerEntryRates")
+##            columns = [column[0] for column in cursor.description]
+##            results = []
+##            rows = cursor.fetchall()
+##            for x in rows:
+##                if x[1] == workerName:
+##                    print str(x[2]) + " " + x[3]
 
-
+##        print results
+        print json.dumps(workers, cls=ObjectEncoder, indent=2, sort_keys=True)
+        return json.dumps(workers, cls=ObjectEncoder, indent=2, sort_keys=True)
+    
+    def post(self):        
+        args = workerRegistryParser.parse_args()
+        c = db_sqlite3.cursor()
+        c.execute(""" insert into workerEntry values(?,?,?,?,?) """,( args["workerName"],args["workerNameDesc"],args["orderQuantity"],args["meanRate"],args["faultCount"] ) )
+        db_sqlite3.commit()        
+        return args,201
+    
+    def put(self):
+        args = workerRegistryParser.parse_args()
+        c = db_sqlite3.cursor()
+        c.execute(""" UPDATE workerEntry SET orderQuantity = ?, meanRate = ?, faultCount = ? WHERE workerName = ?   """,( args["orderQuantity"],args["meanRate"],args["faultCount"],args["workerName"] ) )
+        db_sqlite3.commit()        
+        return args,201
+        
+class WorkerEntryRate(Resource):
+    def get(self):
+        pass
+    def post(self):
+        args = workerRegistryRatesParser.parse_args()        
+        c = db_sqlite3.cursor()
+        c.execute(""" insert into workerEntryRates(workerName,rate,date) values(?,?,?) """, (args["workerName"],args["rate"],args["date"] ))
+        db_sqlite3.commit()
+        return args,201
+    
 api.add_resource(ProductionTime, '/times') # Route_1
 api.add_resource(Order, '/orders') # Route_2
 api.add_resource(Worker, '/workers') # Route_3
 api.add_resource(RegistryEntry, '/entries') # Route_3
+api.add_resource(WorkerEntry, '/workerEntries') # Route_3
+api.add_resource(WorkerEntryRate, '/workerEntriesRates') # Route_3
 
 
 if __name__ == '__main__':
