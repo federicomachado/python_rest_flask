@@ -9,6 +9,8 @@ import pyodbc
 import sqlite3
 import urllib
 import json, inspect
+import getpass
+import win32security
 # pip install simplejson
 
 class ObjectEncoder(json.JSONEncoder):
@@ -66,11 +68,18 @@ def initWorkerRegistryRateParser():
 
     return parser
 
+def initLoginParser():
+    parser = reqparse.RequestParser()
+    parser.add_argument("username")
+    parser.add_argument("password")
+    return parser
+
 try:
     db_connect = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};DATABASE=KPUrusalWS;SERVER=ANTILSRV\SQLEXPRESS;PORT=1433;UID=FMACHADO;PWD=Fede1234')
     registryParser = initRegistryParser()
     workerRegistryParser = initWorkerRegistryParser()
     workerRegistryRatesParser = initWorkerRegistryRateParser()
+    loginParser = initLoginParser()
     app = Flask(__name__)
     cors = CORS(app, resources={"*": {"origins": "*"}})
     db_sqlite3 = sqlite3.connect("entries.db")
@@ -105,7 +114,7 @@ class ProductionTime(Resource):
         cursor = cursor.execute("select a.ArtCodId as 'Articulo', a.ArtDsc as 'Descripcion', a.PrdPesBru as 'TiempoEsperado', a.PrdPesNet as 'TiempoMaximo' from ARTICULO a") # This line performs query and returns json result
         columns = [column[0] for column in cursor.description]
         results = []
-        rows = cursor.fetchall()        
+        rows = cursor.fetchall()
         for row in rows:
             l = list()
             for i in range(len(row)):
@@ -121,16 +130,18 @@ class ProductionTime(Resource):
 
 class RegistryEntry(Resource):
     def get(self):
-        cursor = db_sqlite3.cursor()
-        cursor = cursor.execute("select * from entry;")
-        columns = [column[0] for column in cursor.description]        
-        results = []
-        rows = cursor.fetchall()
-##        print rows
-        for row in rows:            
-            dicc = dict(zip(columns,row))            
-            results.append(dicc)
-        return results
+        try:
+            cursor = db_sqlite3.cursor()
+            cursor = cursor.execute("select * from entry;")
+            columns = [column[0] for column in cursor.description]        
+            results = []
+            rows = cursor.fetchall()
+            for row in rows:            
+                dicc = dict(zip(columns,row))            
+                results.append(dicc)
+            return results
+        except Exception as x:
+            print x
         
     def post(self):
         args = registryParser.parse_args()        
@@ -149,7 +160,6 @@ class Order(Resource):
         columns = [column[0] for column in cursor.description]        
         results = []
         rows = cursor.fetchall()
-        contador = 0
         for row in rows:            
             dicc = dict(zip(columns,row))
             dicc['Fecha'] =str(dicc['Fecha'])
@@ -170,7 +180,7 @@ class Worker(Resource):
         return results
 
 class WorkerEntry(Resource):
-    def get(self):
+    def get(self):        
         cursor = db_sqlite3.cursor()
         cursor = cursor.execute("select * from workerEntry inner join workerEntryRates ON workerEntry.workerName = workerEntryRates.workerName")
         columns = [column[0] for column in cursor.description]        
@@ -193,24 +203,6 @@ class WorkerEntry(Resource):
                 for w in workers:
                     w.rateArray.append(row[7])
                     w.dateArray.append(row[8])
-                
-        for w in workers:
-            print w
-##        for name in names:                        
-##            print name
-##            
-##        for row in results:
-##            workerName = row["workerName"]
-##            cursor = cursor.execute("select * from workerEntryRates")
-##            columns = [column[0] for column in cursor.description]
-##            results = []
-##            rows = cursor.fetchall()
-##            for x in rows:
-##                if x[1] == workerName:
-##                    print str(x[2]) + " " + x[3]
-
-##        print results
-        print json.dumps(workers, cls=ObjectEncoder, indent=2, sort_keys=True)
         return json.dumps(workers, cls=ObjectEncoder, indent=2, sort_keys=True)
     
     def post(self):        
@@ -236,15 +228,41 @@ class WorkerEntryRate(Resource):
         c.execute(""" insert into workerEntryRates(workerName,rate,date) values(?,?,?) """, (args["workerName"],args["rate"],args["date"] ))
         db_sqlite3.commit()
         return args,201
-    
+
+class LoginCredentials(Resource):
+    def get(self):
+        pass
+    def post(self):
+        args = loginParser.parse_args()
+        domain = "ANTIL"
+        username =  args["username"]
+        password = args["password"]
+        try:
+          hUser = win32security.LogonUser (
+            username,
+            domain,
+            password,
+            win32security.LOGON32_LOGON_NETWORK,
+            win32security.LOGON32_PROVIDER_DEFAULT
+          )
+        except win32security.error:
+          print "Failed"
+          return "Login fallido",403
+        else:
+          print "Succeeded"
+          return username,201
+
 api.add_resource(ProductionTime, '/times') # Route_1
 api.add_resource(Order, '/orders') # Route_2
 api.add_resource(Worker, '/workers') # Route_3
 api.add_resource(RegistryEntry, '/entries') # Route_3
 api.add_resource(WorkerEntry, '/workerEntries') # Route_3
 api.add_resource(WorkerEntryRate, '/workerEntriesRates') # Route_3
-
+api.add_resource(LoginCredentials,"/login")
 
 if __name__ == '__main__':
 ##    app.run(host="localhost",port=5000)
+    #app.debug = True
     app.run(host="192.168.1.7",port=5000)
+
+
