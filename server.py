@@ -182,15 +182,16 @@ class Worker(Resource):
 class WorkerEntry(Resource):
     def get(self):        
         cursor = db_sqlite3.cursor()
-        cursor = cursor.execute("select * from workerEntry inner join workerEntryRates ON workerEntry.workerName = workerEntryRates.workerName")
-        columns = [column[0] for column in cursor.description]        
+        cursor = cursor.execute("select * from workerEntry inner join workerEntryRates ON workerEntry.workerName = workerEntryRates.workerName where workerEntry.workerName not like '' ")
+        columns = [column[0] for column in cursor.description]
+        print columns
         results = []
         rows = cursor.fetchall()
         names = []
         workers = []
         dictionary = {}
         for row in rows:
-##            print row
+            print row
             dicc = dict(zip(columns,row))        
             results.append(dicc)
             if row[0] not in names:
