@@ -49,6 +49,8 @@ def initRegistryParser():
     parser.add_argument("timePerWorker")
     parser.add_argument("firstWorkerDesc")
     parser.add_argument("secondWorkerDesc")
+    parser.add_argument("observations")
+    parser.add_argument("motive")
     return parser
 
 def initWorkerRegistryParser():
@@ -75,7 +77,7 @@ def initLoginParser():
     return parser
 
 try:
-    db_connect = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};DATABASE=KPUrusalWS;SERVER=ANTILSRV\SQLEXPRESS;PORT=1433;UID=FMACHADO;PWD=Fede1234')
+    db_connect = pyodbc.connect('DRIVER={ODBC Driver 13 for SQL Server};DATABASE=KPUrusal;SERVER=ANTILSRV\SQLEXPRESS;PORT=1433;UID=FMACHADO;PWD=Fede1234')
     registryParser = initRegistryParser()
     workerRegistryParser = initWorkerRegistryParser()
     workerRegistryRatesParser = initWorkerRegistryRateParser()
@@ -85,7 +87,11 @@ try:
     db_sqlite3 = sqlite3.connect("entries.db")
     api = Api(app) 
 except Exception as x:
+    a = open("log.txt","a")
+    a.write(x)
+    a.close()
     print x
+    
 
 class WorkerObj:
 
@@ -146,7 +152,7 @@ class RegistryEntry(Resource):
     def post(self):
         args = registryParser.parse_args()        
         c = db_sqlite3.cursor()
-        c.execute("""insert into entry values(?,?,?,?,?,?,?,?,?,?,?,?,?)""",(args["order_id"],args["firstWorker"],args["secondWorker"],args["meanTime"],args["meanTimePerWorker"],args["date"],args["startTime"],args["endTime"], args["stopTime"], args["realTime"],args["timePerWorker"],args["firstWorkerDesc"],args["secondWorkerDesc"]    ))
+        c.execute("""insert into entry values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",(args["order_id"],args["firstWorker"],args["secondWorker"],args["meanTime"],args["meanTimePerWorker"],args["date"],args["startTime"],args["endTime"], args["stopTime"], args["realTime"],args["timePerWorker"],args["firstWorkerDesc"],args["secondWorkerDesc"],args["observations"],args["motive"]))
         db_sqlite3.commit()
         return args,201
         
@@ -155,7 +161,7 @@ class Order(Resource):
     def get(self):
         cursor = db_connect.cursor()
         cursor = cursor.execute("select p.OProId as 'Orden', p.OProArtId as 'Articulo', CAST(p.OProCant as CHAR) as 'Cantidad', p.OProObs as 'Observaciones', p.OProFchRea as 'Fecha'  from pordprod p \
-                                      where p.OProFchRea >= '2015/01/06'\
+                                      where p.OProFchRea >= '2017/31/12'\
                                       order by p.OProFchRea desc")
         columns = [column[0] for column in cursor.description]        
         results = []
@@ -168,30 +174,38 @@ class Order(Resource):
     
 class Worker(Resource):
     def get (self):
-        cursor = db_connect.cursor()
-        cursor = cursor.execute("select * from CORENT c where c.AuxTpoId like 'FU'")
-        columns = [column[0] for column in cursor.description]        
-        results = []
-        rows = cursor.fetchall()
-        contador = 0
-        for row in rows:            
-            dicc = dict(zip(columns,row))        
-            results.append(dicc)
-        return results
+        try:
+            cursor = db_connect.cursor()
+            cursor = cursor.execute("select * from CORENT c where c.AuxTpoId like 'FU' and c.EntFlgHab not like 'N'")
+            columns = [column[0] for column in cursor.description]
+            print columns
+            results = []
+            rows = cursor.fetchall()
+            contador = 0
+            for row in rows:
+                print row
+                dicc = dict(zip(columns,row))        
+                results.append(dicc)
+            return results
+        except Exception as x:
+            a = open('log.txt','a')
+            a.write(x)
+            a.close()
+            return x,401
 
 class WorkerEntry(Resource):
     def get(self):        
         cursor = db_sqlite3.cursor()
         cursor = cursor.execute("select * from workerEntry inner join workerEntryRates ON workerEntry.workerName = workerEntryRates.workerName where workerEntry.workerName not like '' ")
         columns = [column[0] for column in cursor.description]
-        print columns
+     #   print columns
         results = []
         rows = cursor.fetchall()
         names = []
         workers = []
         dictionary = {}
         for row in rows:
-            print row
+          #  print row
             dicc = dict(zip(columns,row))        
             results.append(dicc)
             if row[0] not in names:
@@ -262,8 +276,8 @@ api.add_resource(WorkerEntryRate, '/workerEntriesRates') # Route_3
 api.add_resource(LoginCredentials,"/login")
 
 if __name__ == '__main__':
-##    app.run(host="localhost",port=5000)
-    #app.debug = True
-    app.run(host="192.168.1.7",port=5000)
+   app.run(host="192.168.1.7",port=5000)
+##    app.debug = True
+##    app.run()
 
 
