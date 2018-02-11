@@ -218,6 +218,7 @@ class WorkerEntry(Resource):
                 for w in workers:
                     w.rateArray.append(row[7])
                     w.dateArray.append(row[8])
+        print json.dumps(workers, cls=ObjectEncoder, indent=2, sort_keys=True)
         return json.dumps(workers, cls=ObjectEncoder, indent=2, sort_keys=True)
     
     def post(self):        
@@ -267,12 +268,12 @@ class LoginCredentials(Resource):
           print "Succeeded"
           return username,201
 
-api.add_resource(ProductionTime, '/times') # Route_1
-api.add_resource(Order, '/orders') # Route_2
-api.add_resource(Worker, '/workers') # Route_3
-api.add_resource(RegistryEntry, '/entries') # Route_3
-api.add_resource(WorkerEntry, '/workerEntries') # Route_3
-api.add_resource(WorkerEntryRate, '/workerEntriesRates') # Route_3
+##api.add_resource(ProductionTime, '/times') # Route_1
+##api.add_resource(Order, '/orders') # Route_2
+##api.add_resource(Worker, '/workers') # Route_3
+##api.add_resource(RegistryEntry, '/entries') # Route_3
+##api.add_resource(WorkerEntry, '/workerEntries') # Route_3
+##api.add_resource(WorkerEntryRate, '/workerEntriesRates') # Route_3
 api.add_resource(LoginCredentials,"/login")
 
 if __name__ == '__main__':
